@@ -23,12 +23,18 @@ import { UserDto } from '../../../modules/user/dtos';
 import { UserService } from '../../../modules/user/services';
 import { UserLoginDto, UserRegistrationDto } from '../dtos';
 import { LoginSuccessDto } from '../dtos/login-sucess.dto';
-import { LocalAuthenticationGuard, JwtRefreshTokenGuard, EmailConfirmationGuard, JwtAccessTokenGuard, JwtConfirmTokenGuard } from '../guards';
+import {
+  LocalAuthenticationGuard,
+  JwtRefreshTokenGuard,
+  EmailConfirmationGuard,
+  JwtAccessTokenGuard,
+  JwtConfirmTokenGuard,
+} from '../guards';
 import { RequestWithUserInterface } from '../interfaces';
 import { AuthService } from '../services';
 
-
-
+import { UserMailSalesDto } from '../dtos/user-mail-sales.dto';
+import * as SendGrid from '@sendgrid/mail';
 @Controller({ path: 'Auth', version: '1' })
 @ApiTags('Auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -37,7 +43,7 @@ export class AuthController {
     private readonly _authService: AuthService,
     private readonly _userService: UserService,
     private readonly _mailService: MailService,
-  ) { }
+  ) {}
 
   @Post('signup')
   @HttpCode(HttpStatus.OK)
@@ -52,10 +58,8 @@ export class AuthController {
   ): Promise<UserDto> {
     const user = await this._authService.register(userRegistrationDto);
 
-
     return user.toDto();
   }
-
 
   @UseGuards(LocalAuthenticationGuard)
   @Post('signin')
@@ -66,14 +70,18 @@ export class AuthController {
     type: LoginSuccessDto,
   })
   @ApiOperation({ summary: 'Starts a new user session' })
-  async login(@Req() req: RequestWithUserInterface, @Body() userLogin: UserLoginDto, @Res() res): Promise<void> {
+  async login(
+    @Req() req: RequestWithUserInterface,
+    @Body() userLogin: UserLoginDto,
+    @Res() res,
+  ): Promise<void> {
     const [accessTokenCookie, refreshTokenCookie] =
       await this._authService.login(userLogin);
 
     res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
     res.send({
-      success: 'true'
-    })
+      success: 'true',
+    });
   }
 
   @UseGuards(JwtRefreshTokenGuard, EmailConfirmationGuard)
@@ -142,5 +150,33 @@ export class AuthController {
     @Req() { user }: RequestWithUserInterface,
   ): Promise<void> {
     await this._authService.resendConfirmationLink(user);
+  }
+
+  @Post('sendmailsales')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Successfully sent',
+    status: HttpStatus.OK,
+  })
+  @ApiOperation({ summary: 'Allows new users registration' })
+  async sendMailSales(
+    @Body() userMailDto: UserMailSalesDto,
+  ): Promise<SendGrid.ClientResponse> {
+    const mailSales = {
+      to: 'josemiguelaparicio507@gmail.com',
+      subject: 'New user waiting product',
+      from: 'smallbuznoreply@gmail.com',
+      text: `There's a new email coming from: ${userMailDto.email} looking for your product`,
+      html: `<h1>There's a new email coming from: ${userMailDto.email} looking for your product with this text:${userMailDto.message} </h1> `,
+    };
+    const mailCustomer = {
+      to: userMailDto.email,
+      subject: 'Thanks for choosing us!',
+      from: 'smallbuznoreply@gmail.com',
+      text: `In a couple of days, we'll be in contact with you`,
+      html: `<p>In a couple of days, we'll be in contact with you</p> `,
+    };
+    const [result] = await this._mailService.sendMail(mailSales, mailCustomer);
+    return result;
   }
 }
