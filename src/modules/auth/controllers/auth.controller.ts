@@ -166,7 +166,7 @@ export class AuthController {
       to: 'josemiguelaparicio507@gmail.com',
       subject: 'New user waiting product',
       from: 'smallbuznoreply@gmail.com',
-      text: `There's a new email coming from: ${userMailDto.email} looking for your product`,
+      text: `There's a new email coming from: User: ${userMailDto.name}, email: ${userMailDto.email} looking for your product`,
       html: `<h1>There's a new email coming from: ${userMailDto.email} looking for your product with this text:${userMailDto.message} </h1> `,
     };
     const mailCustomer = {
