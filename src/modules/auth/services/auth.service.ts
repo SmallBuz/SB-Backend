@@ -11,8 +11,6 @@ import { TokenPayloadInterface, VerificationTokenPayload } from '../interfaces';
 import { UserEntity } from '../../user/entities';
 import { UserAuthService, UserService } from '../../user/services';
 import { validateHash } from '../../../utils';
-;
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -20,20 +18,17 @@ export class AuthService {
     private readonly _userAuthService: UserAuthService,
     private readonly _jwtService: JwtService,
     private readonly _configService: ConfigService,
-  ) 
-  {}
+  ) {}
 
   public async register(
     userRegistrationDto: UserRegistrationDto,
   ): Promise<UserEntity> {
-    const user = await this._userService.createUser(userRegistrationDto);
-
-    return user;
+    return this._userService.createUser(userRegistrationDto);
   }
 
   public async login(user: UserLoginDto): Promise<string[]> {
     const data = await this._userService.getUserByMail(user.identifier);
-    const accessTokenCookie = this._getCookieWithJwtToken(data.uuid);
+    const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
     const { cookie: refreshTokenCookie, token: refreshToken } =
       this._getCookieWithJwtRefreshToken(data.uuid);
 
@@ -152,4 +147,5 @@ export class AuthService {
 
     return { cookie, token };
   }
+  
 }

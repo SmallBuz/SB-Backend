@@ -12,7 +12,7 @@ import {
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
-import  RateLimit from 'express-rate-limit';
+import RateLimit from 'express-rate-limit';
 
 import helmet from 'helmet';
 
@@ -29,16 +29,18 @@ import { UserAuthEntity, UserEntity } from './modules/user/entities';
 
 import { setupSwagger } from './utils/swagger';
 
-
-
 async function bootstrap(): Promise<void> {
   initializeTransactionalContext();
   patchTypeORMRepositoryWithBaseRepository();
+  const corsOptions = {
+    origin: 'http://localhost:3001',
+    credentials: true,
 
+}
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),
-    { cors: true },
+    { cors: corsOptions },
   );
   const configService = app.get(ConfigService);
 
@@ -47,7 +49,7 @@ async function bootstrap(): Promise<void> {
 
   // Deployment
   app.enable('trust proxy');
-  
+
   const ormdbconfig: DataSourceOptions = {
     name: 'default',
     type: 'postgres',
@@ -57,14 +59,11 @@ async function bootstrap(): Promise<void> {
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
     namingStrategy: new SnakeNamingStrategy(),
-    entities: [
-      UserEntity,
-      UserAuthEntity],
-    migrations: ["dist/migration/**/*.js"],
+    entities: [UserEntity, UserAuthEntity],
+    migrations: ['dist/migration/**/*.js'],
     migrationsRun: true,
     synchronize: false,
     logging: true,
-
   };
   const AppDataSource = new DataSource(ormdbconfig)
   AppDataSource.initialize()
@@ -74,7 +73,6 @@ async function bootstrap(): Promise<void> {
   .catch((err) => {
       console.error("Error during Data Source initialization", err)
   })
-
 
   // Security
   app.use(cookieParser());
@@ -104,17 +102,17 @@ async function bootstrap(): Promise<void> {
     new QueryFailedFilter(reflector),
   );
 
-    // Documentation
+  // Documentation
   if (configService.get('APP_ENV') !== 'production') {
     setupSwagger(app);
   }
-const portApp =  process.env.PORT || configService.get('APP_PORT');
-
-
+  const portApp = process.env.PORT || configService.get('APP_PORT');
 
   await app.listen(portApp);
   Logger.log(
-    `Application is running on: ${(await app.getUrl()).removeSlashAtEnd + '/'}${configService.get('APP_PREFIX')}, 
+    `Application is running on: ${
+      (await app.getUrl()).removeSlashAtEnd + '/'
+    }${configService.get('APP_PREFIX')}, 
     PORT API ${portApp} PORT 2:  ${process.env.PORT}`,
     'InstanceLoader',
   );

@@ -6,9 +6,12 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAccessTokenGuard } from '../../../../../modules/auth/guards';
 import { ResponseCode } from '../../../../../common/constants/response.constant';
 import { userArchiveAddRequest } from '../dto/request/user_archive_add_request.dto';
 import { userArchiveGetRequest } from '../dto/request/user_archive_get_request.dto';
@@ -34,6 +37,7 @@ export class userArchiveController {
     @Body() userGetRequest: userArchiveGetRequest,
   ): Promise<any> {
     const userAddDeviceDtoResponse = new userAddDeviceResponse();
+
     return await this._userArchive
       .getAllArchives(userGetRequest)
       .then((e) => {
@@ -41,6 +45,7 @@ export class userArchiveController {
         return e;
       })
       .catch((err) => {
+        console.log(err)
         userAddDeviceDtoResponse.Status = ResponseCode.FAIL_CODE;
         return userAddDeviceDtoResponse;
       });

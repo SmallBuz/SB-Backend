@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { SnakeNamingStrategy } from './strategies';
-import { UserAuthSubscriber, UserSubscriber } from '../user/subscribers';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { UserAuthSubscriber, UserSubscriber } from "../user/subscribers";
+import { SnakeNamingStrategy } from "./strategies";
 
 @Module({
   imports: [

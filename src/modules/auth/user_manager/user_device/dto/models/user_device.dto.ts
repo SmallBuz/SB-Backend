@@ -3,10 +3,6 @@ import { IsNotEmpty, IsString } from "class-validator";
 
 export class userDeviceDto {
 
-  @ApiProperty({ description: 'User Device name' })
-  @IsString()
-  @IsNotEmpty()
-   emailMaster: string;
 
   @ApiProperty({ description: 'Password of User´s Device' })
   @IsString()

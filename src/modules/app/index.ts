@@ -1,4 +1,3 @@
-
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
@@ -10,9 +9,7 @@ import { userDeviceModule } from '../auth/user_manager/user_device';
 import { AppController } from './controllers';
 import { AppService } from './services';
 import { userArchiveModule } from '../auth/user_manager/user_archives/user_archives_module';
-
-
-
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -42,10 +39,11 @@ import { userArchiveModule } from '../auth/user_manager/user_archives/user_archi
     AuthModule,
     MailModule,
     userDeviceModule,
-    userArchiveModule
-    
+    userArchiveModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}

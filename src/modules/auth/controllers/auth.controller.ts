@@ -35,6 +35,13 @@ import { AuthService } from '../services';
 
 import { UserMailSalesDto } from '../dtos/user-mail-sales.dto';
 import * as SendGrid from '@sendgrid/mail';
+import {
+  ResponseCode,
+  responseKey,
+  ResponseName,
+} from '../../../common/constants/response.constant';
+import { SuccessResponse } from '../../../common/dtos/http-response.dto';
+import { UserUpdateDto } from '../dtos/user-update.dto';
 @Controller({ path: 'Auth', version: '1' })
 @ApiTags('Auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -50,15 +57,21 @@ export class AuthController {
   @ApiOkResponse({
     description: 'Successfully Registered',
     status: HttpStatus.OK,
-    type: UserDto,
+    type: SuccessResponse,
   })
   @ApiOperation({ summary: 'Allows new users registration' })
   async register(
     @Body() userRegistrationDto: UserRegistrationDto,
-  ): Promise<UserDto> {
-    const user = await this._authService.register(userRegistrationDto);
-
-    return user.toDto();
+    @Res() res,
+  ): Promise<any> {
+    await this._authService.register(userRegistrationDto);
+    res
+      .status(HttpStatus.OK)
+      .json({
+        [responseKey.STATUS]: ResponseCode.SUCCESS_CODE,
+        [responseKey.MESSAGE]: ResponseName.SUCCESS,
+      })
+      .send();
   }
 
   @UseGuards(LocalAuthenticationGuard)
@@ -77,14 +90,14 @@ export class AuthController {
   ): Promise<void> {
     const [accessTokenCookie, refreshTokenCookie] =
       await this._authService.login(userLogin);
-
-    res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.set('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
     res.send({
       success: 'true',
     });
   }
 
-  @UseGuards(JwtRefreshTokenGuard, EmailConfirmationGuard)
+  @UseGuards(JwtRefreshTokenGuard)
   @Get('profile')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
@@ -99,6 +112,27 @@ export class AuthController {
     const userEntity = await this._userService.getUser(user.uuid);
 
     return userEntity.toDto();
+  }
+
+  @UseGuards(JwtAccessTokenGuard)
+  @Post('updateprofile')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'An user logged in and a session cookie',
+    status: HttpStatus.OK,
+    type: LoginSuccessDto,
+  })
+  @ApiOperation({ summary: 'Starts a new user session' })
+  async updateProfile(
+    @Req() req: RequestWithUserInterface,
+    @Body() userUpdate: UserUpdateDto,
+    @Res() res,
+  ): Promise<void> {
+    const userUpdateResponse = await this._userService.updateUser(userUpdate);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.send({
+      success: 'true',
+    });
   }
 
   @UseGuards(JwtAccessTokenGuard)
