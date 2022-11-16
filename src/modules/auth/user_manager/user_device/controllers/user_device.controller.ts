@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -16,12 +17,12 @@ import { ResponseCode } from '../../../../../common/constants/response.constant'
 import { userDeviceDto } from '../dto/models/user_device.dto';
 import { userAddDeviceResponse } from '../dto/response/user_add_device_response.dto';
 import { userAddDeviceGenericResponse } from '../dto/response/user_device_response.dto';
-import { userDeviceGetRequest } from '../dto/request/user_device_get_request.dto';
 import { userDeviceRemoveRequest } from '../dto/request/user_device_remove_request.dto';
 import { userDeviceUpdateRequest } from '../dto/request/user_device_update_request.dto';
 import { JwtAccessTokenGuard } from '../../../../../modules/auth/guards';
 import { RequestWithUserInterface } from 'src/modules/auth/interfaces';
 import { userDeviceGetOneDto } from '../dto/request/user_device_get_one_request.dto';
+import { PageOptionsDto } from '../../../../../common/dtos';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('userDevice')
@@ -32,16 +33,20 @@ export class userDeviceController {
   @Get('getAllUserDevices')
   @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
+  
   @ApiResponse({
     status: 200,
     description: 'Retrieving array with user devices of master',
     type: [userAddDeviceGenericResponse],
   })
   @ApiOperation({ summary: 'Returns a list of all user Devices listed on DB' })
-  async getUserDevices(@Req() req: RequestWithUserInterface): Promise<any> {
+  async getUserDevices(
+    @Req() req: RequestWithUserInterface,
+    @Query() options: PageOptionsDto,
+  ): Promise<any> {
     const userAddDeviceDtoResponse = new userAddDeviceResponse();
     return await this._userDevice
-      .getAllDevices(req.user.userAuth.email)
+      .getAllDevices(req.user.userAuth.email, options)
       .then((e) => {
         userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
         return e;
@@ -67,7 +72,7 @@ export class userDeviceController {
   ): Promise<any> {
     const userAddDeviceDtoResponse = new userAddDeviceResponse();
     return await this._userDevice
-      .getOneDevice(req.user.userAuth.email,userGetOneDeviceDto)
+      .getOneDevice(req.user.userAuth.email, userGetOneDeviceDto)
       .then((e) => {
         userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
         return e;
@@ -104,6 +109,7 @@ export class userDeviceController {
       });
   }
   @Post('removeOneDevice')
+  @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'remove one device to user master' })
   @ApiResponse({
@@ -112,11 +118,12 @@ export class userDeviceController {
     type: [userAddDeviceResponse],
   })
   async removeOneUserDevice(
+    @Req() req: RequestWithUserInterface,
     @Body() userDeviceRequest: userDeviceRemoveRequest,
   ): Promise<userAddDeviceResponse> {
     const userAddDeviceDtoResponse = new userAddDeviceResponse();
     return await this._userDevice
-      .removeOneDevice(userDeviceRequest)
+      .removeOneDevice(req.user.userAuth.email, userDeviceRequest)
       .then(() => {
         userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
         return userAddDeviceDtoResponse;

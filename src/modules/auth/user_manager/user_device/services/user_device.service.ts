@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PageOptionsDto } from '../../../../../common/dtos';
 import { Repository } from 'typeorm';
 import { userDeviceDto } from '../dto/models/user_device.dto';
 import { userDeviceGetOneDto } from '../dto/request/user_device_get_one_request.dto';
@@ -14,12 +15,18 @@ export class UserDeviceService {
     private readonly _userDeviceRepository: Repository<userDeviceEntity>,
   ) {}
 
-  public async getAllDevices(userEmail: string): Promise<any> {
-    const queryBuilder = this._userDeviceRepository
+  public async getAllDevices(
+    userEmail: string,
+    options: PageOptionsDto,
+  ): Promise<any> {
+    const [users, itemCount] = await this._userDeviceRepository
       .createQueryBuilder('user_device')
       .where('email_master = :email', { email: userEmail })
-      .execute();
-    return queryBuilder;
+      //.orderBy('createdAt', options.order)
+      .skip(options.skip)
+      .take(options.take)
+      .getManyAndCount();
+    return {users, itemCount};
   }
 
   public async getOneDevice(
@@ -46,32 +53,36 @@ export class UserDeviceService {
     return await this._userDeviceRepository.save(user);
   }
   public async removeOneDevice(
+    emailMaster: string,
     userDevice: userDeviceRemoveRequest,
   ): Promise<any> {
-    //const queryBuilder = this._userDeviceRepository
-    // .createQueryBuilder('user_devices')
-    // .update(userDevice)
-    // .delete()
-    // .where('uuid = :uuid_device', { uuid_device: userDevice.device_uuid })
-    // .andWhere('email_master = :email_master', {
-    //   email_master: userDevice.emailMaster,
-    // })
-    // .execute();
-    //return queryBuilder;
+    const queryBuilder = this._userDeviceRepository
+      .createQueryBuilder('user_devices')
+      .update({
+        emailMaster: emailMaster,
+        uuid: userDevice.device_uuid,
+      })
+      .delete()
+      .where('uuid = :uuid_device', { uuid_device: userDevice.device_uuid })
+      .andWhere('email_master = :email_master', {
+        email_master: emailMaster,
+      })
+      .execute();
+    return queryBuilder;
   }
   public async updateOneDevice(userDevice: userDeviceUpdateRequest) {
-      const queryBuilder = this._userDeviceRepository
-        .createQueryBuilder('user_devices')
-        .update(userDevice)
-        .set({
-          userName: userDevice.deviceName,
-          userPassword: userDevice.userPassword,
-        })
-        .where('uuid = :uuid_device', { uuid_device: userDevice.device_uuid })
-        .andWhere('email_master = :email_master', {
-          email_master: userDevice.emailMaster,
-        })
-        .execute();
-      return queryBuilder;
+    const queryBuilder = this._userDeviceRepository
+      .createQueryBuilder('user_devices')
+      .update(userDevice)
+      .set({
+        userName: userDevice.deviceName,
+        userPassword: userDevice.userPassword,
+      })
+      .where('uuid = :uuid_device', { uuid_device: userDevice.device_uuid })
+      .andWhere('email_master = :email_master', {
+        email_master: userDevice.emailMaster,
+      })
+      .execute();
+    return queryBuilder;
   }
 }
