@@ -26,7 +26,6 @@ import { LoginSuccessDto } from '../dtos/login-sucess.dto';
 import {
   LocalAuthenticationGuard,
   JwtRefreshTokenGuard,
-  EmailConfirmationGuard,
   JwtAccessTokenGuard,
   JwtConfirmTokenGuard,
 } from '../guards';
@@ -64,14 +63,15 @@ export class AuthController {
     @Body() userRegistrationDto: UserRegistrationDto,
     @Res() res,
   ): Promise<any> {
-    await this._authService.register(userRegistrationDto);
-    res
-      .status(HttpStatus.OK)
-      .json({
-        [responseKey.STATUS]: ResponseCode.SUCCESS_CODE,
-        [responseKey.MESSAGE]: ResponseName.SUCCESS,
-      })
-      .send();
+    const [accessTokenCookie, refreshTokenCookie] =
+      await this._authService.register(userRegistrationDto);
+    console.log('tokenfuera1', accessTokenCookie);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.set('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
+
+    res.send({
+      success: 'true',
+    });
   }
 
   @UseGuards(LocalAuthenticationGuard)
@@ -128,16 +128,16 @@ export class AuthController {
     @Body() userUpdate: UserUpdateDto,
     @Res() res,
   ): Promise<void> {
-    const userUpdateResponse = await this._userService.updateUser(userUpdate);
+    await this._userService.updateUser(userUpdate);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.send({
       success: 'true',
     });
   }
 
-  @UseGuards(JwtAccessTokenGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('signout')
+  // @UseGuards(JwtAccessTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete current user session' })
   async logout(@Req() request: RequestWithUserInterface): Promise<void> {
     await this._authService.logout(request.user);

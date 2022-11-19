@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -23,17 +24,17 @@ import { JwtAccessTokenGuard } from '../../../auth/guards';
 import { RequestWithUserInterface } from 'src/modules/auth/interfaces';
 import { userDeviceGetOneDto } from '../dto/request/user_device_get_one_request.dto';
 import { PageOptionsDto } from '../../../../common/dtos';
+import { userDeviceGetOneLoginDto } from '../dto/request/user_device_get_one_login_request.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('userDevice')
-@ApiTags('userDevice')
+@Controller('POSDevice')
+@ApiTags('POSDevice')
 export class POSDeviceController {
   constructor(private readonly _userDevice: POSDeviceService) {}
 
-  @Get('getAllUserDevices')
+  @Get('getAllPOSDevices')
   @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
-  
   @ApiResponse({
     status: 200,
     description: 'Retrieving array with user devices of master',
@@ -56,8 +57,37 @@ export class POSDeviceController {
         return userAddDeviceDtoResponse;
       });
   }
+  @Post('getLoginPOSDevice')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieving array with user devices of master',
+    type: [userAddDeviceGenericResponse],
+  })
+  @ApiOperation({ summary: 'Returns a list of an user Devices listed on DB' })
+  async GetOneDeviceLogin(
+    @Body() userGetOneDeviceDto: userDeviceGetOneLoginDto,
+    @Res() res,
+  ): Promise<void> {
+    const [accessTokenCookie, refreshTokenCookie] =
+      await this._userDevice.getOneDeviceLogin(userGetOneDeviceDto);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.set('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
+    res.send({
+      success: 'true',
+    });
+    // .then((e) => {
+    //
+    //   userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
+    //   return e;
+    // })
+    // .catch((err) => {
+    //   userAddDeviceDtoResponse.Status = ResponseCode.FAIL_CODE;
+    //   return userAddDeviceDtoResponse;
+    // });
+  }
 
-  @Post('getOneDevice')
+  @Post('getOnePOSDevice')
   @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
@@ -65,7 +95,7 @@ export class POSDeviceController {
     description: 'Retrieving array with user devices of master',
     type: [userAddDeviceGenericResponse],
   })
-  @ApiOperation({ summary: 'Returns a list of all user Devices listed on DB' })
+  @ApiOperation({ summary: 'Returns a list of an user Devices listed on DB' })
   async GetOneDevice(
     @Req() req: RequestWithUserInterface,
     @Body() userGetOneDeviceDto: userDeviceGetOneDto,
@@ -83,7 +113,7 @@ export class POSDeviceController {
       });
   }
 
-  @Post('addOneDevice')
+  @Post('addOnePOSDevice')
   @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'adds one device to user master' })
@@ -108,7 +138,7 @@ export class POSDeviceController {
         return userAddDeviceDtoResponse;
       });
   }
-  @Post('removeOneDevice')
+  @Post('removeOnePOSDevice')
   @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'remove one device to user master' })
@@ -134,7 +164,8 @@ export class POSDeviceController {
       });
   }
 
-  @Post('updateOneDevice')
+  @Post('updateOnePOSDevice')
+  @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'update one device to user master' })
   @ApiResponse({
@@ -143,11 +174,12 @@ export class POSDeviceController {
     type: [userAddDeviceResponse],
   })
   async updateOneUserDevice(
+    @Req() req: RequestWithUserInterface,
     @Body() userDeviceRequest: userDeviceUpdateRequest,
   ): Promise<userAddDeviceResponse> {
     const userAddDeviceDtoResponse = new userAddDeviceResponse();
     return await this._userDevice
-      .updateOneDevice(userDeviceRequest)
+      .updateOneDevice(req.user.userAuth.email, userDeviceRequest)
       .then(() => {
         userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
         return userAddDeviceDtoResponse;

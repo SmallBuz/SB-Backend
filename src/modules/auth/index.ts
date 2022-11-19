@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 
 import { MailModule } from '../mail';
 import { UserModule } from '../master_user';
+import { POSDeviceModule } from '../pos_manager/pos_users';
 import { AuthController } from './controllers';
 import { AuthService } from './services';
 import { JwtAccessTokenStrategy, JwtConfirmTokenStrategy, JwtRefreshTokenStrategy, LocalStrategy } from './strategies';
@@ -17,6 +18,7 @@ import { JwtAccessTokenStrategy, JwtConfirmTokenStrategy, JwtRefreshTokenStrateg
     UserModule,
     PassportModule,
     ConfigModule,
+    POSDeviceModule,
     forwardRef(() => MailModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],

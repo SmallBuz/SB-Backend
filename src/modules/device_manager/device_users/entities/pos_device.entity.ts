@@ -15,11 +15,11 @@ export class userDeviceEntity {
   @Generated('uuid')
   uuid: string;
 
-  @Column({ type: 'enum', enum: RoleType, default: RoleType.POS_ACCOUNT })
+  @Column({ type: 'enum', enum: RoleType, default: RoleType.DEVICE_ACCOUNT })
   role: RoleType;
 
   @Column()
-  emailMaster: string;
+  emailPOS: string;
 
   @Column()
   userName: string;
@@ -36,13 +36,13 @@ export class userDeviceEntity {
   updatedAt: Date;
 
   constructor(
-    emailMaster: string,
+    emailPOS: string,
     userName: string,
     userPassword: string,
     role?: RoleType,
   ) {
-    this.role = role || RoleType.MASTER_ACCOUNT;
-    this.emailMaster = emailMaster;
+    this.role = role || RoleType.DEVICE_ACCOUNT;
+    this.emailPOS = emailPOS;
     this.userName = userName;
     this.userPassword = userPassword;
   }

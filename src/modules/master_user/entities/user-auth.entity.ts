@@ -23,6 +23,9 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
   @Column({ unique: true })
   email: string;
 
+  @Column({ nullable: true })
+  email_master: string;
+
   @Column()
   password: string;
 
@@ -61,6 +64,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     isEmailConfirmed?: boolean,
     currentHashedRefreshToken?: string,
     user?: UserEntity,
+    email_pos?: string,
   );
   constructor(
     role: RoleType,
@@ -69,6 +73,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     isEmailConfirmed?: boolean,
     currentHashedRefreshToken?: string,
     user?: UserEntity,
+    email_master?: string,
   );
   constructor(
     role: RoleType,
@@ -77,6 +82,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     isEmailConfirmed: boolean,
     currentHashedRefreshToken?: string,
     user?: UserEntity,
+    email_master?: string,
   );
   constructor(
     role: RoleType,
@@ -85,6 +91,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     isEmailConfirmed: boolean,
     currentHashedRefreshToken: string,
     user?: UserEntity,
+    email_master?: string,
   );
   constructor(
     role?: RoleType,
@@ -93,6 +100,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     isEmailConfirmed?: boolean,
     currentHashedRefreshToken?: string,
     user?: UserEntity,
+    email_master?: string,
   );
   constructor(
     role?: RoleType,
@@ -101,6 +109,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     isEmailConfirmed?: boolean,
     currentHashedRefreshToken?: string,
     user?: UserEntity,
+    email_master?: string,
   ) {
     super();
 
@@ -110,5 +119,6 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     this.isEmailConfirmed = isEmailConfirmed || false;
     this.currentHashedRefreshToken = currentHashedRefreshToken || '';
     this.user = user || undefined;
+    this.email_master = email_master || undefined;
   }
 }

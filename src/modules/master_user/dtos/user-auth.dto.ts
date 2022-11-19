@@ -19,10 +19,14 @@ export class UserAuthDto extends AbstractDto {
   @ApiProperty({ description: 'User last logout date' })
   readonly lastLogoutDate: Date;
 
+  @ApiProperty({ description: 'User role on platform' })
+  readonly role: string;
+
   constructor(userAuth: UserAuthEntity) {
     super(userAuth);
 
     this.pinCode = userAuth.pinCode;
+    this.role = userAuth.role;
     this.email = userAuth.email;
     this.lastSuccessfulLoggedDate = userAuth.lastSuccessfulLoggedDate;
     this.lastFailedLoggedDate = userAuth.lastFailedLoggedDate;

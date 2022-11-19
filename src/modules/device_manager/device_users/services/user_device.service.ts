@@ -21,12 +21,12 @@ export class UserDeviceService {
   ): Promise<any> {
     const [users, itemCount] = await this._userDeviceRepository
       .createQueryBuilder('user_device')
-      .where('email_master = :email', { email: userEmail })
+      .where('emailPOS = :emailPOS', { email: userEmail })
       //.orderBy('createdAt', options.order)
       .skip(options.skip)
       .take(options.take)
       .getManyAndCount();
-    return {users, itemCount};
+    return { users, itemCount };
   }
 
   public async getOneDevice(
@@ -35,7 +35,7 @@ export class UserDeviceService {
   ): Promise<any> {
     const queryBuilder = this._userDeviceRepository
       .createQueryBuilder('user_device')
-      .where('email_master = :email', { email: emailMaster })
+      .where('emailPOS = :emailPOS', { emailPOS: emailMaster })
       .andWhere('uuid = :uuid', { uuid: oneDevice.userDeviceName })
       .getOne();
     return queryBuilder;
@@ -48,7 +48,7 @@ export class UserDeviceService {
     const user = this._userDeviceRepository.create({
       userName: userDevice.userName,
       userPassword: userDevice.userPassword,
-      emailMaster: emailMaster,
+      emailPOS: emailMaster,
     });
     return await this._userDeviceRepository.save(user);
   }
@@ -59,13 +59,13 @@ export class UserDeviceService {
     const queryBuilder = this._userDeviceRepository
       .createQueryBuilder('user_devices')
       .update({
-        emailMaster: emailMaster,
+        emailPOS: emailMaster,
         uuid: userDevice.device_uuid,
       })
       .delete()
       .where('uuid = :uuid_device', { uuid_device: userDevice.device_uuid })
-      .andWhere('email_master = :email_master', {
-        email_master: emailMaster,
+      .andWhere('emailPOS = :emailPOS', {
+        emailPOS: emailMaster,
       })
       .execute();
     return queryBuilder;
@@ -79,8 +79,8 @@ export class UserDeviceService {
         userPassword: userDevice.userPassword,
       })
       .where('uuid = :uuid_device', { uuid_device: userDevice.device_uuid })
-      .andWhere('email_master = :email_master', {
-        email_master: userDevice.emailMaster,
+      .andWhere('emailPOS = :emailPOS', {
+        emailPOS: userDevice.emailMaster,
       })
       .execute();
     return queryBuilder;

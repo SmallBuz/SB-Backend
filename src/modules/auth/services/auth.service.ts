@@ -11,10 +11,13 @@ import { TokenPayloadInterface, VerificationTokenPayload } from '../interfaces';
 import { UserEntity } from '../../master_user/entities';
 import { UserAuthService, UserService } from '../../master_user/services';
 import { validateHash } from '../../../utils';
+import { RoleType } from '../../../modules/master_user/constants';
+import { POSDeviceService } from '../../../modules/pos_manager/pos_users/services/user_device.service';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly _userService: UserService,
+    private readonly _posDeviceService: POSDeviceService,
     private readonly _userAuthService: UserAuthService,
     private readonly _jwtService: JwtService,
     private readonly _configService: ConfigService,
@@ -22,13 +25,13 @@ export class AuthService {
 
   public async register(
     userRegistrationDto: UserRegistrationDto,
-  ): Promise<UserEntity> {
-    return this._userService.createUser(userRegistrationDto);
-  }
-
-  public async login(user: UserLoginDto): Promise<string[]> {
-    const data = await this._userService.getUserByMail(user.identifier);
+  ): Promise<string[]> {
+    const user = await this._userService.createUser(userRegistrationDto);
+    console.log('usessr:', await user);
+    const data = await this._userService.getUserByMail(user.userAuth.email);
+    console.log('patata1');
     const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
+    console.log('patata2');
     const { cookie: refreshTokenCookie, token: refreshToken } =
       this._getCookieWithJwtRefreshToken(data.uuid);
 
@@ -36,12 +39,64 @@ export class AuthService {
       data.userAuth.id,
       refreshToken,
     );
-
+    console.log('patata3');
+    console.log('tokens1', accessTokenCookie);
+    console.log('tokens2', refreshTokenCookie);
     return [accessTokenCookie, refreshTokenCookie];
   }
 
+  public async login(user: UserLoginDto): Promise<string[]> {
+    if (user.ac_type === RoleType.MASTER_ACCOUNT) {
+      console.log('chgheckp');
+      const data = await this._userService.getUserByMail(user.identifier);
+
+      const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
+
+      const { cookie: refreshTokenCookie, token: refreshToken } =
+        this._getCookieWithJwtRefreshToken(data.uuid);
+
+      await this._userAuthService.updateRefreshToken(
+        data.userAuth.id,
+        refreshToken,
+      );
+      return [accessTokenCookie, refreshTokenCookie];
+    }
+    if (user.ac_type === RoleType.POS_ACCOUNT) {
+      console.log('chgheck');
+      const checkRelation = await this._posDeviceService.getOneDeviceLogin(
+        user,
+      );
+      console.log('checkre:', checkRelation);
+      if (checkRelation) {
+        console.log('relation');
+        const data = await this._userService.getUserByMail(user.identifier);
+
+        const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
+
+        const { cookie: refreshTokenCookie, token: refreshToken } =
+          this._getCookieWithJwtRefreshToken(data.uuid);
+
+        await this._userAuthService.updateRefreshToken(
+          data.userAuth.id,
+          refreshToken,
+        );
+
+        return [accessTokenCookie, refreshTokenCookie];
+      }
+    }
+    console.log('chghec2k');
+  }
+
   public async logout(user: UserEntity): Promise<void> {
-    await this._userAuthService.updateRefreshToken(user.userAuth.id, null);
+    try {
+      const response = await this._userAuthService.updateRefreshToken(
+        user.userAuth.id,
+        null,
+      );
+      console.log('update;', response);
+    } catch (e) {
+      console.log('aqui estoy2:', e);
+    }
   }
 
   public async validateUser(userLoginDto: UserLoginDto): Promise<UserEntity> {
@@ -51,7 +106,7 @@ export class AuthService {
       email: identifier,
       uuid: identifier,
     });
-
+    console.log('pass1');
     if (!user) {
       throw new WrongCredentialsProvidedException();
     }
@@ -60,11 +115,11 @@ export class AuthService {
       password,
       user.userAuth.password,
     );
-
+    console.log('pass2');
     if (!isPasswordValid) {
       throw new WrongCredentialsProvidedException();
     }
-
+    console.log('pass3');
     return user;
   }
 
@@ -134,6 +189,7 @@ export class AuthService {
   }
 
   private _getCookieWithJwtRefreshToken(uuid: string) {
+    console.log('patataimportante', uuid);
     const payload: TokenPayloadInterface = { uuid };
     const token = this._jwtService.sign(payload, {
       secret: this._configService.get('JWT_REFRESH_TOKEN_SECRET_KEY'),
@@ -147,5 +203,4 @@ export class AuthService {
 
     return { cookie, token };
   }
-  
 }

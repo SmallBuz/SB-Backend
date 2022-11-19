@@ -41,7 +41,7 @@ export class POSDeviceEntity {
     userPassword: string,
     role?: RoleType,
   ) {
-    this.role = role || RoleType.MASTER_ACCOUNT;
+    this.role = role || RoleType.POS_ACCOUNT;
     this.emailMaster = emailMaster;
     this.userName = userName;
     this.userPassword = userPassword;
