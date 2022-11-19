@@ -25,7 +25,7 @@ import {
 import { HttpExceptionFilter, QueryFailedFilter } from './filters';
 import { AppModule } from './modules/app';
 import { SnakeNamingStrategy } from './modules/database/strategies';
-import { UserAuthEntity, UserEntity } from './modules/user/entities';
+import { UserAuthEntity, UserEntity } from './modules/master_user/entities';
 
 import { setupSwagger } from './utils/swagger';
 

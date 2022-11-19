@@ -8,8 +8,8 @@ import {
   WrongCredentialsProvidedException,
 } from '../exceptions';
 import { TokenPayloadInterface, VerificationTokenPayload } from '../interfaces';
-import { UserEntity } from '../../user/entities';
-import { UserAuthService, UserService } from '../../user/services';
+import { UserEntity } from '../../master_user/entities';
+import { UserAuthService, UserService } from '../../master_user/services';
 import { validateHash } from '../../../utils';
 @Injectable()
 export class AuthService {

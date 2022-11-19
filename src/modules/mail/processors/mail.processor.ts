@@ -10,7 +10,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bull';
 
-import { UserEntity } from '../../../modules/user/entities';
+import { UserEntity } from '../../master_user/entities';
 import { CONFIRM_REGISTRATION, MAIL_QUEUE } from '../constants';
 
 

@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { UserAuthSubscriber, UserSubscriber } from "../user/subscribers";
+import { UserAuthSubscriber, UserSubscriber } from "../master_user/subscribers";
 import { SnakeNamingStrategy } from "./strategies";
 
 @Module({

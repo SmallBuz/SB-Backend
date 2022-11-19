@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { RoleType } from '../../../modules/user/constants';
+import { RoleType } from '../../master_user/constants';
 
 
 export class RolesGuard implements CanActivate {

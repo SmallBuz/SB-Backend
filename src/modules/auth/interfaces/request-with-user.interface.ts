@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { UserEntity } from '../../../modules/user/entities';
+import { UserEntity } from '../../master_user/entities';
 
 
 export interface RequestWithUserInterface extends Request {

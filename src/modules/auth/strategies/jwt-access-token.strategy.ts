@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from '../../../modules/user/entities';
-import { UserService } from '../../../modules/user/services';
+import { UserEntity } from '../../master_user/entities';
+import { UserService } from '../../master_user/services';
 import { TokenPayloadInterface } from '../interfaces';
 
 @Injectable()

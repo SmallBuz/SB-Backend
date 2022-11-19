@@ -19,8 +19,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MailService } from '../../../modules/mail/services';
-import { UserDto } from '../../../modules/user/dtos';
-import { UserService } from '../../../modules/user/services';
+import { UserDto } from '../../master_user/dtos';
+import { UserService } from '../../master_user/services';
 import { UserLoginDto, UserRegistrationDto } from '../dtos';
 import { LoginSuccessDto } from '../dtos/login-sucess.dto';
 import {

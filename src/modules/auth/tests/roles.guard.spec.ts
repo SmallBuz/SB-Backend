@@ -2,7 +2,7 @@ import { Reflector } from '@nestjs/core';
 import { createMock } from '@golevelup/nestjs-testing';
 import { ExecutionContext } from '@nestjs/common';
 
-import { RoleType } from '../../user/constants';
+import { RoleType } from '../../master_user/constants';
 import { RolesGuard } from '../guards';
 
 describe('RolesGuard', () => {

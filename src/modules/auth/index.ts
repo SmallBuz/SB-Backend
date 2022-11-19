@@ -6,7 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 
 
 import { MailModule } from '../mail';
-import { UserModule } from '../user';
+import { UserModule } from '../master_user';
 import { AuthController } from './controllers';
 import { AuthService } from './services';
 import { JwtAccessTokenStrategy, JwtConfirmTokenStrategy, JwtRefreshTokenStrategy, LocalStrategy } from './strategies';

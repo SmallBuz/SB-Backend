@@ -4,11 +4,11 @@ import * as Joi from 'joi';
 import { AuthModule } from '../auth';
 import { DatabaseModule } from '../database';
 import { MailModule } from '../mail';
-import { UserModule } from '../user';
-import { userDeviceModule } from '../auth/user_manager/user_device';
+import { UserModule } from '../master_user';
+import { POSDeviceModule } from '../pos_manager/pos_users';
 import { AppController } from './controllers';
 import { AppService } from './services';
-import { userArchiveModule } from '../auth/user_manager/user_archives/user_archives_module';
+import { POSArchiveModule } from '../pos_manager/pos_archives/user_archives_module';
 import { DataSource } from 'typeorm';
 
 @Module({
@@ -38,8 +38,8 @@ import { DataSource } from 'typeorm';
     UserModule,
     AuthModule,
     MailModule,
-    userDeviceModule,
-    userArchiveModule,
+    POSDeviceModule,
+    POSArchiveModule,
   ],
   controllers: [AppController],
   providers: [AppService],
