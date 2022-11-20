@@ -31,13 +31,11 @@ export class UserService {
     userCreateDto: UserRegistrationDto,
   ): Promise<UserEntity> {
     let user: UserRegistrationCleanDto & UserEntity = undefined;
-    console.log('userCreateDto', userCreateDto);
     try {
       if (userCreateDto.role == RoleType.POS_ACCOUNT) {
-        console.log('POS');
         const role = userCreateDto.role;
         const email_master = userCreateDto.email_master;
-
+        const uuid_master = userCreateDto.uuid_master;
         const userModel: UserRegistrationCleanDto = {
           firstName: userCreateDto.firstName,
           lastName: userCreateDto.lastName,
@@ -53,6 +51,7 @@ export class UserService {
             const createdUser = {
               ...userModel,
               role,
+              uuid_master,
               password,
               user,
               pinCode,
@@ -136,7 +135,7 @@ export class UserService {
     }
 
     if (options.email && isEmail(options.email)) {
-      console.log("eamil")
+      console.log('eamil');
       queryBuilder.orWhere('userAuth.email = :email', { email: options.email });
     }
     return await queryBuilder.getOne();

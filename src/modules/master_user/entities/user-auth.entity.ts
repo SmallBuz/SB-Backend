@@ -26,6 +26,9 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
   @Column({ nullable: true })
   email_master: string;
 
+  @Column({ nullable: true })
+  uuid_master: string;
+
   @Column()
   password: string;
 
@@ -65,6 +68,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     currentHashedRefreshToken?: string,
     user?: UserEntity,
     email_pos?: string,
+    uuid_master?: string,
   );
   constructor(
     role: RoleType,
@@ -74,6 +78,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     currentHashedRefreshToken?: string,
     user?: UserEntity,
     email_master?: string,
+    uuid_master?: string,
   );
   constructor(
     role: RoleType,
@@ -83,6 +88,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     currentHashedRefreshToken?: string,
     user?: UserEntity,
     email_master?: string,
+    uuid_master?: string,
   );
   constructor(
     role: RoleType,
@@ -92,6 +98,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     currentHashedRefreshToken: string,
     user?: UserEntity,
     email_master?: string,
+    uuid_master?: string,
   );
   constructor(
     role?: RoleType,
@@ -101,6 +108,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     currentHashedRefreshToken?: string,
     user?: UserEntity,
     email_master?: string,
+    uuid_master?: string,
   );
   constructor(
     role?: RoleType,
@@ -110,6 +118,7 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     currentHashedRefreshToken?: string,
     user?: UserEntity,
     email_master?: string,
+    uuid_master?: string,
   ) {
     super();
 
@@ -120,5 +129,6 @@ export class UserAuthEntity extends AbstractEntity<UserAuthDto> {
     this.currentHashedRefreshToken = currentHashedRefreshToken || '';
     this.user = user || undefined;
     this.email_master = email_master || undefined;
+    this.uuid_master = uuid_master || undefined;
   }
 }

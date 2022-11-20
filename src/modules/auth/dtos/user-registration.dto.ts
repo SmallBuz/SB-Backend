@@ -37,7 +37,12 @@ export class UserRegistrationDto {
   @ApiProperty({ description: 'User last name' })
   @IsString()
   @IsOptional()
-  readonly email_master?: RoleType;
+  email_master?: string;
+
+  @ApiProperty({ description: 'User last name' })
+  @IsString()
+  @IsOptional()
+  readonly uuid_master?: string;
 }
 export class UserRegistrationCleanDto {
   @ApiProperty({ description: 'User first name' })

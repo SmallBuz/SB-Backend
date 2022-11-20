@@ -14,6 +14,7 @@ import { validateHash } from '../../../utils';
 import { RoleType } from '../../../modules/master_user/constants';
 import { POSDeviceService } from '../../../modules/pos_manager/pos_users/services/user_device.service';
 import { WrongPasswordProvidedException } from '../exceptions/wrong-password-provided.exception';
+import { WrongMasterProvidedException } from '../exceptions/wrong-master-provided.exception';
 @Injectable()
 export class AuthService {
   constructor(
@@ -42,10 +43,11 @@ export class AuthService {
       return [accessTokenCookie, refreshTokenCookie];
     }
     if (userRegistrationDto.role == RoleType.POS_ACCOUNT) {
-      const user = await this._userService.createUser(userRegistrationDto);
-      const userMaster = await this._userService.getUserByMail(
-        user.userAuth.email_master,
+      const userMaster = await this._userService.getUser(
+        userRegistrationDto.uuid_master,
       );
+      userRegistrationDto.email_master = userMaster.userAuth.email;
+      await this._userService.createUser(userRegistrationDto);
 
       const accessTokenCookie = await this._getCookieWithJwtToken(
         userMaster.uuid,
@@ -63,8 +65,7 @@ export class AuthService {
   }
 
   public async login(user: UserLoginDto): Promise<string[]> {
-    if (user.ac_type === RoleType.MASTER_ACCOUNT && !user.email_master) {
-      console.log('checkMASTERp');
+    if (!user.email_master && user.ac_type === RoleType.MASTER_ACCOUNT) {
       const data = await this._userService.getUserByMail(user.identifier);
 
       const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
@@ -78,23 +79,30 @@ export class AuthService {
       );
       return [accessTokenCookie, refreshTokenCookie];
     }
-    if (user.ac_type === RoleType.POS_ACCOUNT) {
-      console.log('checkPOS');
-      const checkRelation = await this._posDeviceService.getOneDeviceLogin(
+
+    if (user.email_master && user.ac_type === RoleType.POS_ACCOUNT) {
+      const userMaster = await this._userService.getUserByMail(
+        user.email_master,
+      );
+      if (!userMaster) {
+        throw new WrongMasterProvidedException();
+      }
+      const POSUserCheck = await this._posDeviceService.getOneDeviceLogin(
+        userMaster,
         user,
       );
-      console.log('checkre:', checkRelation);
-      if (checkRelation) {
-        console.log('relation');
-        const data = await this._userService.getUserByMail(user.identifier);
+      if (POSUserCheck) {
+        const userPOS = await this._userService.getUser(user.identifier);
 
-        const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
+        const accessTokenCookie = await this._getCookieWithJwtToken(
+          userPOS.uuid,
+        );
 
         const { cookie: refreshTokenCookie, token: refreshToken } =
-          this._getCookieWithJwtRefreshToken(data.uuid);
+          this._getCookieWithJwtRefreshToken(userPOS.uuid);
 
         await this._userAuthService.updateRefreshToken(
-          data.userAuth.id,
+          userPOS.userAuth.id,
           refreshToken,
         );
 

@@ -10,7 +10,7 @@ import { userDeviceGetOneLoginDto } from '../dto/request/user_device_get_one_log
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from '../../../../modules/master_user/entities';
-import { isEmail } from 'class-validator';
+import { isEmail, isUUID } from 'class-validator';
 import { UserService } from '../../../../modules/master_user/services';
 
 @Injectable()
@@ -49,7 +49,7 @@ export class POSDeviceService {
       });
     }
 
-  //  console.log('Todo', users);
+    //  console.log('Todo', users);
     return { users, itemCount };
   }
 
@@ -77,15 +77,16 @@ export class POSDeviceService {
     return users;
   }
   public async getOneDeviceLogin(
+    userMaster: UserEntity,
     oneDevice: userDeviceGetOneLoginDto,
   ): Promise<any> {
     console.log('onedevice:', oneDevice);
     const queryBuilder = this._userRepository.createQueryBuilder('user');
     queryBuilder.leftJoinAndSelect('user.userAuth', 'userAuth');
-    if (oneDevice.email_master && isEmail(oneDevice.email_master)) {
+    if (userMaster.uuid && isUUID(userMaster.uuid)) {
       await queryBuilder
-        .where('userAuth.email_master = :email_master', {
-          email_master: oneDevice.email_master,
+        .where('userAuth.uuid_master = :uuid_master', {
+          uuid_master: userMaster.uuid,
         })
         .andWhere('userAuth.email = :email', {
           email: oneDevice.identifier,
