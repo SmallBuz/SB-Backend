@@ -23,8 +23,9 @@ import { userDeviceUpdateRequest } from '../dto/request/user_device_update_reque
 import { JwtAccessTokenGuard } from '../../../auth/guards';
 import { RequestWithUserInterface } from 'src/modules/auth/interfaces';
 import { userDeviceGetOneDto } from '../dto/request/user_device_get_one_request.dto';
-import { PageOptionsDto } from '../../../../common/dtos';
+import { PageDto, PageOptionsDto } from '../../../../common/dtos';
 import { userDeviceGetOneLoginDto } from '../dto/request/user_device_get_one_login_request.dto';
+import { UserDto } from '../../../../modules/master_user/dtos';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('POSDevice')
@@ -45,46 +46,12 @@ export class POSDeviceController {
     @Req() req: RequestWithUserInterface,
     @Query() options: PageOptionsDto,
   ): Promise<any> {
-    const userAddDeviceDtoResponse = new userAddDeviceResponse();
-    return await this._userDevice
-      .getAllDevices(req.user.userAuth.email, options)
-      .then((e) => {
-        userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
-        return e;
-      })
-      .catch((err) => {
-        userAddDeviceDtoResponse.Status = ResponseCode.FAIL_CODE;
-        return userAddDeviceDtoResponse;
-      });
-  }
-  @Post('getLoginPOSDevice')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: 200,
-    description: 'Retrieving array with user devices of master',
-    type: [userAddDeviceGenericResponse],
-  })
-  @ApiOperation({ summary: 'Returns a list of an user Devices listed on DB' })
-  async GetOneDeviceLogin(
-    @Body() userGetOneDeviceDto: userDeviceGetOneLoginDto,
-    @Res() res,
-  ): Promise<void> {
-    const [accessTokenCookie, refreshTokenCookie] =
-      await this._userDevice.getOneDeviceLogin(userGetOneDeviceDto);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.set('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
-    res.send({
-      success: 'true',
-    });
-    // .then((e) => {
-    //
-    //   userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
-    //   return e;
-    // })
-    // .catch((err) => {
-    //   userAddDeviceDtoResponse.Status = ResponseCode.FAIL_CODE;
-    //   return userAddDeviceDtoResponse;
-    // });
+    const responseService = await this._userDevice.getAllDevices(
+      req.user.userAuth.email,
+      options,
+    );
+    console.log('estoy aqui:', responseService);
+    return responseService;
   }
 
   @Post('getOnePOSDevice')

@@ -136,9 +136,9 @@ export class UserService {
     }
 
     if (options.email && isEmail(options.email)) {
+      console.log("eamil")
       queryBuilder.orWhere('userAuth.email = :email', { email: options.email });
     }
-    console.log;
     return await queryBuilder.getOne();
   }
 

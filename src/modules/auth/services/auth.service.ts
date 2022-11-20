@@ -13,6 +13,7 @@ import { UserAuthService, UserService } from '../../master_user/services';
 import { validateHash } from '../../../utils';
 import { RoleType } from '../../../modules/master_user/constants';
 import { POSDeviceService } from '../../../modules/pos_manager/pos_users/services/user_device.service';
+import { WrongPasswordProvidedException } from '../exceptions/wrong-password-provided.exception';
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,28 +27,44 @@ export class AuthService {
   public async register(
     userRegistrationDto: UserRegistrationDto,
   ): Promise<string[]> {
-    const user = await this._userService.createUser(userRegistrationDto);
-    console.log('usessr:', await user);
-    const data = await this._userService.getUserByMail(user.userAuth.email);
-    console.log('patata1');
-    const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
-    console.log('patata2');
-    const { cookie: refreshTokenCookie, token: refreshToken } =
-      this._getCookieWithJwtRefreshToken(data.uuid);
+    if (userRegistrationDto.role == RoleType.MASTER_ACCOUNT) {
+      const user = await this._userService.createUser(userRegistrationDto);
+      const data = await this._userService.getUserByMail(user.userAuth.email);
+      const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
+      const { cookie: refreshTokenCookie, token: refreshToken } =
+        this._getCookieWithJwtRefreshToken(data.uuid);
 
-    await this._userAuthService.updateRefreshToken(
-      data.userAuth.id,
-      refreshToken,
-    );
-    console.log('patata3');
-    console.log('tokens1', accessTokenCookie);
-    console.log('tokens2', refreshTokenCookie);
-    return [accessTokenCookie, refreshTokenCookie];
+      await this._userAuthService.updateRefreshToken(
+        data.userAuth.id,
+        refreshToken,
+      );
+
+      return [accessTokenCookie, refreshTokenCookie];
+    }
+    if (userRegistrationDto.role == RoleType.POS_ACCOUNT) {
+      const user = await this._userService.createUser(userRegistrationDto);
+      const userMaster = await this._userService.getUserByMail(
+        user.userAuth.email_master,
+      );
+
+      const accessTokenCookie = await this._getCookieWithJwtToken(
+        userMaster.uuid,
+      );
+      const { cookie: refreshTokenCookie, token: refreshToken } =
+        this._getCookieWithJwtRefreshToken(userMaster.uuid);
+
+      await this._userAuthService.updateRefreshToken(
+        userMaster.userAuth.id,
+        refreshToken,
+      );
+
+      return [accessTokenCookie, refreshTokenCookie];
+    }
   }
 
   public async login(user: UserLoginDto): Promise<string[]> {
-    if (user.ac_type === RoleType.MASTER_ACCOUNT) {
-      console.log('chgheckp');
+    if (user.ac_type === RoleType.MASTER_ACCOUNT && !user.email_master) {
+      console.log('checkMASTERp');
       const data = await this._userService.getUserByMail(user.identifier);
 
       const accessTokenCookie = await this._getCookieWithJwtToken(data.uuid);
@@ -62,7 +79,7 @@ export class AuthService {
       return [accessTokenCookie, refreshTokenCookie];
     }
     if (user.ac_type === RoleType.POS_ACCOUNT) {
-      console.log('chgheck');
+      console.log('checkPOS');
       const checkRelation = await this._posDeviceService.getOneDeviceLogin(
         user,
       );
@@ -106,18 +123,19 @@ export class AuthService {
       email: identifier,
       uuid: identifier,
     });
-    console.log('pass1');
+    console.log('pass1', user);
     if (!user) {
       throw new WrongCredentialsProvidedException();
     }
-
+    console.log('pass', password);
+    console.log('pass2', user.userAuth.password);
     const isPasswordValid = await validateHash(
       password,
       user.userAuth.password,
     );
-    console.log('pass2');
+    console.log('pass2', isPasswordValid);
     if (!isPasswordValid) {
-      throw new WrongCredentialsProvidedException();
+      throw new WrongPasswordProvidedException();
     }
     console.log('pass3');
     return user;
