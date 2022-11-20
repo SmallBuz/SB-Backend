@@ -33,7 +33,6 @@ export class userDeviceController {
   @Get('getAllUserDevices')
   @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
-  
   @ApiResponse({
     status: 200,
     description: 'Retrieving array with user devices of master',
@@ -135,6 +134,7 @@ export class userDeviceController {
   }
 
   @Post('updateOneDevice')
+  @UseGuards(JwtAccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'update one device to user master' })
   @ApiResponse({
@@ -143,11 +143,12 @@ export class userDeviceController {
     type: [userAddDeviceResponse],
   })
   async updateOneUserDevice(
+    @Req() req: RequestWithUserInterface,
     @Body() userDeviceRequest: userDeviceUpdateRequest,
   ): Promise<userAddDeviceResponse> {
     const userAddDeviceDtoResponse = new userAddDeviceResponse();
     return await this._userDevice
-      .updateOneDevice(userDeviceRequest)
+      .updateOneDevice(req.user.userAuth.email, userDeviceRequest)
       .then(() => {
         userAddDeviceDtoResponse.Status = ResponseCode.SUCCESS_CODE;
         return userAddDeviceDtoResponse;

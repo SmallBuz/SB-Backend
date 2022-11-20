@@ -10,6 +10,7 @@ import { AppController } from './controllers';
 import { AppService } from './services';
 import { POSArchiveModule } from '../pos_manager/pos_archives/user_archives_module';
 import { DataSource } from 'typeorm';
+import { userDeviceModule } from '../device_manager/device_users';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { DataSource } from 'typeorm';
     AuthModule,
     MailModule,
     POSDeviceModule,
+    userDeviceModule,
     POSArchiveModule,
   ],
   controllers: [AppController],

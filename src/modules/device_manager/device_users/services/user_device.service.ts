@@ -21,7 +21,7 @@ export class UserDeviceService {
   ): Promise<any> {
     const [users, itemCount] = await this._userDeviceRepository
       .createQueryBuilder('user_device')
-      .where('emailPOS = :emailPOS', { email: userEmail })
+      .where('email_pos = :emailPOS', { emailPOS: userEmail })
       //.orderBy('createdAt', options.order)
       .skip(options.skip)
       .take(options.take)
@@ -35,7 +35,7 @@ export class UserDeviceService {
   ): Promise<any> {
     const queryBuilder = this._userDeviceRepository
       .createQueryBuilder('user_device')
-      .where('emailPOS = :emailPOS', { emailPOS: emailMaster })
+      .where('email_pos = :emailPOS', { emailPOS: emailMaster })
       .andWhere('uuid = :uuid', { uuid: oneDevice.userDeviceName })
       .getOne();
     return queryBuilder;
@@ -70,7 +70,10 @@ export class UserDeviceService {
       .execute();
     return queryBuilder;
   }
-  public async updateOneDevice(userDevice: userDeviceUpdateRequest) {
+  public async updateOneDevice(
+    emailPOS: string,
+    userDevice: userDeviceUpdateRequest,
+  ) {
     const queryBuilder = this._userDeviceRepository
       .createQueryBuilder('user_devices')
       .update(userDevice)
@@ -80,7 +83,7 @@ export class UserDeviceService {
       })
       .where('uuid = :uuid_device', { uuid_device: userDevice.device_uuid })
       .andWhere('emailPOS = :emailPOS', {
-        emailPOS: userDevice.emailMaster,
+        emailPOS: emailPOS,
       })
       .execute();
     return queryBuilder;

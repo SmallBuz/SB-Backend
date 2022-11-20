@@ -5,13 +5,8 @@ export class userDeviceUpdateRequest {
   @ApiProperty({ description: 'User Device name' })
   @IsString()
   @IsNotEmpty()
-  emailMaster: string;
-
-  @ApiProperty({ description: 'User Device name' })
-  @IsString()
-  @IsNotEmpty()
   deviceName: string;
-  
+
   @ApiProperty({ description: 'Password of User´s Device' })
   @IsString()
   @IsNotEmpty()
