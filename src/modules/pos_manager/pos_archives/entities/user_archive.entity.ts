@@ -6,7 +6,10 @@ export class POSArchiveEntity {
   uuid: string;
 
   @Column()
-  emailMaster: string;
+  email_master: string;
+
+  @Column()
+  uuid_master: string;
 
   @Column()
   device_uuid: string;
@@ -21,16 +24,19 @@ export class POSArchiveEntity {
   date: Date;
 
   constructor(
-    emailMaster: string,
+    email_master: string,
     device_uuid: string,
     data_type: string,
     content: object[],
     date: Date,
+    uuid_master: string,
   ) {
-    this.emailMaster = emailMaster;
+    this.email_master = email_master;
     this.device_uuid = device_uuid;
     this.data_type = data_type;
     this.content = content;
     this.date = date;
+
+    this.uuid_master = uuid_master;
   }
 }
