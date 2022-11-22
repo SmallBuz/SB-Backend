@@ -3,11 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { RoleType } from '../../user/constants';
+import { RoleType } from '../../master_user/constants';
 import { AuthService } from '../services';
-import { UserEntity, UserAuthEntity } from '../../user/entities';
-import { UserService, UserAuthService } from '../../user/services';
-import { UserAuthRepository, UserRepository } from '../../user/repositories';
+import { UserEntity, UserAuthEntity } from '../../master_user/entities';
+import { UserService, UserAuthService } from '../../master_user/services';
+import { UserAuthRepository, UserRepository } from '../../master_user/repositories';
 import {
   mockedConfigService,
   mockedJwtService,

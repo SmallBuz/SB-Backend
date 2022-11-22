@@ -4,7 +4,7 @@ import 'providers/polyfill.provider';
 import { ConfigService } from '@nestjs/config';
 import { ConnectionOptions } from 'typeorm';
 import { SnakeNamingStrategy } from '../modules/database/strategies';
-import { UserAuthSubscriber, UserSubscriber } from '../modules/user/subscribers';
+import { UserAuthSubscriber, UserSubscriber } from '../modules/master_user/subscribers';
 
 
 

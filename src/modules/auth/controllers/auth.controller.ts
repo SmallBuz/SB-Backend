@@ -19,14 +19,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MailService } from '../../../modules/mail/services';
-import { UserDto } from '../../../modules/user/dtos';
-import { UserService } from '../../../modules/user/services';
+import { UserDto } from '../../master_user/dtos';
+import { UserService } from '../../master_user/services';
 import { UserLoginDto, UserRegistrationDto } from '../dtos';
 import { LoginSuccessDto } from '../dtos/login-sucess.dto';
 import {
   LocalAuthenticationGuard,
   JwtRefreshTokenGuard,
-  EmailConfirmationGuard,
   JwtAccessTokenGuard,
   JwtConfirmTokenGuard,
 } from '../guards';
@@ -35,6 +34,13 @@ import { AuthService } from '../services';
 
 import { UserMailSalesDto } from '../dtos/user-mail-sales.dto';
 import * as SendGrid from '@sendgrid/mail';
+import {
+  ResponseCode,
+  responseKey,
+  ResponseName,
+} from '../../../common/constants/response.constant';
+import { SuccessResponse } from '../../../common/dtos/http-response.dto';
+import { UserUpdateDto } from '../dtos/user-update.dto';
 @Controller({ path: 'Auth', version: '1' })
 @ApiTags('Auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -50,15 +56,22 @@ export class AuthController {
   @ApiOkResponse({
     description: 'Successfully Registered',
     status: HttpStatus.OK,
-    type: UserDto,
+    type: SuccessResponse,
   })
   @ApiOperation({ summary: 'Allows new users registration' })
   async register(
     @Body() userRegistrationDto: UserRegistrationDto,
-  ): Promise<UserDto> {
-    const user = await this._authService.register(userRegistrationDto);
+    @Res() res,
+  ): Promise<any> {
+    const [accessTokenCookie, refreshTokenCookie] =
+      await this._authService.register(userRegistrationDto);
+    console.log('tokenfuera1', accessTokenCookie);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.set('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
 
-    return user.toDto();
+    res.send({
+      success: 'true',
+    });
   }
 
   @UseGuards(LocalAuthenticationGuard)
@@ -77,14 +90,14 @@ export class AuthController {
   ): Promise<void> {
     const [accessTokenCookie, refreshTokenCookie] =
       await this._authService.login(userLogin);
-
-    res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.set('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
     res.send({
       success: 'true',
     });
   }
 
-  @UseGuards(JwtRefreshTokenGuard, EmailConfirmationGuard)
+  @UseGuards(JwtRefreshTokenGuard)
   @Get('profile')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
@@ -102,8 +115,29 @@ export class AuthController {
   }
 
   @UseGuards(JwtAccessTokenGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('updateprofile')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'An user logged in and a session cookie',
+    status: HttpStatus.OK,
+    type: LoginSuccessDto,
+  })
+  @ApiOperation({ summary: 'Starts a new user session' })
+  async updateProfile(
+    @Req() req: RequestWithUserInterface,
+    @Body() userUpdate: UserUpdateDto,
+    @Res() res,
+  ): Promise<void> {
+    await this._userService.updateUser(userUpdate);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.send({
+      success: 'true',
+    });
+  }
+
   @Patch('signout')
+  // @UseGuards(JwtAccessTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete current user session' })
   async logout(@Req() request: RequestWithUserInterface): Promise<void> {
     await this._authService.logout(request.user);
@@ -166,7 +200,7 @@ export class AuthController {
       to: 'josemiguelaparicio507@gmail.com',
       subject: 'New user waiting product',
       from: 'smallbuznoreply@gmail.com',
-      text: `There's a new email coming from: ${userMailDto.email} looking for your product`,
+      text: `There's a new email coming from: User: ${userMailDto.name}, email: ${userMailDto.email} looking for your product`,
       html: `<h1>There's a new email coming from: ${userMailDto.email} looking for your product with this text:${userMailDto.message} </h1> `,
     };
     const mailCustomer = {

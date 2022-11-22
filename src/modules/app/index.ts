@@ -1,18 +1,16 @@
-
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { AuthModule } from '../auth';
 import { DatabaseModule } from '../database';
 import { MailModule } from '../mail';
-import { UserModule } from '../user';
-import { userDeviceModule } from '../auth/user_manager/user_device';
+import { UserModule } from '../master_user';
+import { POSDeviceModule } from '../pos_manager/pos_users';
 import { AppController } from './controllers';
 import { AppService } from './services';
-import { userArchiveModule } from '../auth/user_manager/user_archives/user_archives_module';
-
-
-
+import { POSArchiveModule } from '../pos_manager/pos_archives/user_archives_module';
+import { DataSource } from 'typeorm';
+import { userDeviceModule } from '../device_manager/device_users';
 
 @Module({
   imports: [
@@ -41,11 +39,13 @@ import { userArchiveModule } from '../auth/user_manager/user_archives/user_archi
     UserModule,
     AuthModule,
     MailModule,
+    POSDeviceModule,
     userDeviceModule,
-    userArchiveModule
-    
+    POSArchiveModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}
